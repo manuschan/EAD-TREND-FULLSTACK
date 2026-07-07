@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theme Switch Pro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Sail&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playwrite+IS:wght@400;700&display=swap" rel="stylesheet"/>
+
+  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+.hero{
+  background: url(images/shoes.jpeg) fixed;  
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
+  text-align: start;
+  border-radius: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;  
+  padding: .8rem;
+  isolation: isolate;
+  box-shadow:0 24px 40px black;
+}
+
+/* Overlay sombre premium */
+.hero::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background:
+    linear-gradient(
+        to right,
+        rgba(0,0,0,0.75),
+        rgba(0,0,0,0.45),
+        rgba(0,0,0,0.70)
+    );
+
+    z-index: 2;
+}
+
+/* Toutes les images */
+.hero .bg{
+    position: absolute;
+    inset: 0;
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    opacity: 0;
+
+    transform: scale(1);
+
+    animation: smoothSlider 16s infinite;
+
+    z-index: 1;
+}
+
+/* Images */
+.bg1{
+    background-image: url("images/shoes.jpeg");
+    animation-delay: 0s;
+}
+
+.bg2{
+    background-image: url("images/Unity in Diversity_ A Casual Assembly of Sneakers.png");
+    animation-delay: 8s;
+}
+
+.bg3{
+    background-image: url("images/electro.png");
+    animation-delay: 16s;
+}
+
+/* VRAIE transition fluide */
+@keyframes smoothSlider{
+
+    0%{
+        opacity: 0;
+        transform: scale(1);
+    }
+
+    8%{
+        opacity: 1;
+    }
+
+    20%{
+        opacity: 1;
+        transform: scale(1.08);
+    }
+
+    28%{
+        opacity: 0;
+        transform: scale(1.12);
+    }
+
+    100%{
+        opacity: 0;
+    }
+}
+
+/* Contenu au-dessus */
+.hero .bref,
+.hero .gallery{
+    position: relative;
+    z-index: 5;
+}
+  </style>
+</head>
+
+<body>
+
+  <header class="navbar">
+    <div class="liens">
+      <input type="checkbox" name="" id="push">
+        <label for="push" class="push">
+            <span></span>
+            <span></span>
+            <span></span>                
+        </label>
+      <div class="connection">
+        <button onclick="showDescription('inscription')" class="subscriber" id="navSignup">Sign up</button>
+        <button onclick="showDescription('connexion')" class="subscriber" id="navLogin">Login</button>
+        <button onclick="showDescription('moncompte')" class="subscriber compte-btn" id="navAccount" style="display:none">
+          <span class="compte-ava" id="navAvatar">?</span>
+          <span id="navName">Mon compte</span>
+        </button>
+        <button id="toggle" class="theme-btn">🌙</button>
+      </div>
+      <nav>
+        <div class="link">
+          <i class="fa-solid fa-house"></i>
+          <a href="#hero">Accueil</a>
+        </div>
+        <div class="link">
+          <i class="fa-solid fa-handshake"></i>
+          <a href="#sold">Services</a>
+        </div>
+        <div class="link" >
+            <i class="fa-solid fa-circle-user"></i>
+            <a href="#" id="btn-contact" onclick="showDescription('contact')">Contact</a>
+        </div>
+
+      </nav>
+    </div>
+  </header>
+
+  <div class="contact" id="contact">
+    <a href="tel:242065537650" class="telephone-btn" target="blank" aria-label="contact telephone"> <i class="fa fa-phone"></i></a>
+    <a href="https://wa.me/242065537650" class="whatsapp-btn" target="blank" aria-label="contact whatsapp"> <i class="fab fa-whatsapp"></i></a>
+  </div>
+  
+  <div class="pop-up" id="connexion">
+    <form action="" method="get"  >
+      <span class="close-btn" onclick="closePop('connexion')">&times;</span>
+      <h2>Connectez-vous</h2>
+      <input type="email" id="loginEmail" placeholder="E-mail">
+      <input type="password" id="loginPassword" placeholder="Mot de passe">
+      <button type="button" onclick="connexion()">Se connecter</button>
+    </form>
+  </div>
+  <div class="pop-up" id="inscription">
+    <form action="" method="get" id="registerForm" >
+      <span class="close-btn" onclick="closePop('inscription')">&times;</span>
+      <h2>inscrivez-vous</h2>
+      <input type="text" name="nom" id="nom" placeholder="Nom(s)" required>
+      <input type="text" name="prenom" id="prenom" placeholder="Prénom(s)" required>
+      <input type="email" name="email" id="email" placeholder="E-mail" required>
+      <input type="tel" name="telephone" id="telephone" placeholder="Numéro de téléphone" pattern="[0-9+ ]{6,20}" required>
+      <input type="password" name="password" id="password" placeholder="Mot de passe" required>
+      <button type="submit">Envoyer</button>
+    </form>
+  </div>
+  
+
+
+  <!-- ══════ POP-UP MON COMPTE ══════ -->
+  <div class="pop-up" id="moncompte">
+    <div class="compte-panel">
+      <span class="close-btn" onclick="closePop('moncompte')">&times;</span>
+
+      <div class="compte-head">
+        <div class="compte-big-ava" id="compteBigAva">?</div>
+        <div class="pseudo">
+          <h4 id="compteNom">—</h4>
+          <h5 id="compteEmail" class="compte-mail">—</h5>
+        </div>
+      </div>
+
+    
+      <div class="compte-stats">
+        <div class="compte-stat">
+          <strong id="statAnnonces">0</strong>
+          <span>Annonces</span>
+        </div>
+        <div class="compte-stat">
+          <strong id="statFavoris">0</strong>
+          <span>Mes favoris</span>
+        </div>
+      </div>
+
+      <div class="divider">
+        <div class="div-line"></div><div class="div-dot"></div><div class="div-line"></div>
+      </div>
+
+      <div class="compte-tabs">
+        <button class="compte-tab on" data-tab="annonces" onclick="setCompteTab(this)">🏷️ Mes annonces</button>
+        <button class="compte-tab" data-tab="favoris" onclick="setCompteTab(this)">❤️ Favoris</button>
+      </div>
+
+      <div class="compte-body" id="compteBody">
+        <!-- rempli dynamiquement par renderCompte() -->
+      </div>
+
+      <button class="compte-logout" onclick="deconnexion()">🚪 Se déconnecter</button>
+    </div>
+  </div>
+
+
+
+
+
+
+
+  <main id="hero" class="hero" style=" background: url(images/shoes.jpeg) fixed; background-position: center; background-repeat: no-repeat; background-size: cover;">
+    <div class="bg bg1"></div>
+    <div class="bg bg2"></div>
+    <div class="bg bg3"></div>
+    <div class="bg bg4"></div>
+    <div class="bg bg5"></div>
+    <div class="bref">
+      <div class="section-label"><span class="pulse"></span>Plateforme E.A.D de ventes</div>
+      <h2>Achète & vends <br> entre <span>étudiants</span></h2>
+      <p>Cours, livres, matériels informatique, vêtements, services... Échange en confiance des articles de seconde main. <br> Simple, rapide, local.</p>
+
+      <div class="properties">
+        <div>
+          <i class="fa-solid fa-house"></i>
+          <p>Des prix <br> justes</p>
+        </div>
+        <div>
+          <i class="fa-solid fa-handshake"></i>
+          <p>Fiable &<br> locale</p>
+        </div>
+        <div>
+          <i class="fa-solid fa-circle-user"></i>
+          <p>Rapide &<br> facile</p>
+        </div>
+      </div>
+
+      <div class="action">
+        <button class="btn-primary">  
+          <a href="#sold">Voir les articles</a>
+        </button>
+        <button class="btn-primary">
+          <a href="#import">Vendre des articles</a>
+        </button>
+      </div>
+    </div>
+    <div class="gallery">
+      <img src="images/transaction.png" alt="">
+      <img src="images/chaussures_1.png" alt="">
+      <img src="images/Organized Wardrobe.png" alt="">
+      <img src="images/electro (1).png" alt="">
+    </div>
+
+  </main>
+      <div class="banner">
+        <div class="section-label" style="margin-bottom:.6rem"><span class="pulse"></span> Annonces actives</div>
+        <h2>À propos <em>de nous</em></h2>
+      </div>
+    <section class="about">
+      <div class="about-1">
+        <div class="point"><span class="pulse"></span><span class="pulse"></span><span class="pulse"></span></div>
+        <p>
+          <h4>Vends facilement <br> tes articles</h4>
+          Ajoute tes photo, fixe ton prix, et touche des acheteurs <br> rapidement.
+        </p>
+        <img src="images/clique.png" alt="">
+      </div>
+      <div class="about-2">
+        <div class="point"><span class="pulse"></span><span class="pulse"></span><span class="pulse"></span></div>
+        <p>
+          <h4>Achète malin et <br> économise plus</h4>
+          Des mmiliers d'articles en bon état, jusqu'à -70% du prix neuf.
+        </p>
+        <img src="images/claque.png" alt="">
+      </div>
+      <div class="about-3">
+        <div class="point"><span class="pulse"></span><span class="pulse"></span><span class="pulse"></span></div>
+        <p>
+          <h4>Échange <br> en toute sécurité</h4>
+          paiements sécurisés, messagerie intégrée et système de notation.
+        </p>
+        <div class="block">
+          <div>
+            <i class="fa-solid fa-handshake"></i>
+            <p>
+              <span>Messagerie intégrée</span> <br>
+              Échange facilement avec les Acheteurs/Vendeurs
+            </p>
+          </div>
+          <div>
+            <i class="fa-solid fa-handshake"></i>
+            <p>
+              <span>Membres notés</span> <br>
+              Achète et vends en confiance
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    
+  <section class="scroll-container">
+    <div class="scroll-content">
+      <div class="choices">
+        <img src="images/chaussures.png" alt="">
+        <a href="">Chaussures</a>
+      </div>
+      <div class="choices">
+        <img src="images/vetements.png" alt="">
+        <a href="">vêtements</a>
+      </div>
+      <div class="choices">
+        <img src="images/electro (1).png" alt="">
+        <a href="">Électroniques</a>
+      </div>
+      <div class="choices">
+        <img src="images/Organized Wardrobe.png" alt="">
+        <a href="">Autres...</a>
+      </div>
+    </div>
+  </section>
+  <!-- 
+  <div class="info">
+    <div class="soon">
+      <div class="mot"><span class="pulse"></span>Bientôt</div>
+      <h3><span>+1123</span> <br> Clients/mois</h3>
+    </div>
+    <div class="soon">
+      <div class="mot"><span class="pulse"></span>Bientôt</div>
+      <h3><span>+109</span> <br> Ventes/jours</h3>
+    </div>
+    <div class="soon">
+      <div class="mot"><span class="pulse"></span>Bientôt</div>
+      <h3><span>96%</span> <br> Clients heureux</h3>
+    </div>
+  </div>
+  -->
+  
+
+  
+
+<!-- Divider -->
+<div class="divider">
+  <div class="div-line"></div><div class="div-dot"></div><div class="div-line"></div>
+</div>
+
+<!-- ══════════ ARTICLES EN VENTE ══════════ -->
+<div id="marketSection">
+  <div class="market-head">
+    <div>
+      <div class="section-label" style="margin-bottom:.6rem"><span class="pulse"></span> Annonces actives</div>
+      <h2 id="sold">Articles en <em>vente</em></h2>
+    </div>
+<!--<div class="container"> 
+      <input type="checkbox" name="" id="search">
+      <label for="search">
+        <span onclick="showDescription('search')">🔍</span>
+      </label>
+      <div class="search">
+        <button class="btn-search">Rechercher</button>
+        <input type="text" name="" id="" placeholder="     Search..." >
+      </div>
+    </div>
+ -->
+    <div class="market-controls">
+      <span class="count-badge" id="articleCount">0 article</span>
+      <button class="chip on" data-filter="all" onclick="setFilter(this)">Tout voir</button>
+      <button class="chip" data-filter="📚 Livres & Cours" onclick="setFilter(this)">📚 Livres</button>
+      <button class="chip" data-filter="💻 High-Tech" onclick="setFilter(this)">💻 Tech</button>
+      <button class="chip" data-filter="👗 Mode" onclick="setFilter(this)">👗 Mode</button>
+    </div>
+    
+  </div>
+
+
+  <div class="articles-grid" id="articlesGrid"></div>
+</div>
+
+<!-- Divider -->
+<div class="divider">
+  <div class="div-line"></div><div class="div-dot"></div><div class="div-line"></div>
+</div>
+
+<!-- 
+<div class="use">
+  <div class="contain">
+    <div class="part">
+      <div class="mot"><div class="point"><span class="pulse"></span><span class="pulse"></span><span class="pulse"></span></div><p>Cliquez ici -></p></div>
+      <div class="show">
+        <img src="images/souscrire.png" alt="">
+      </div>
+    </div>
+    <div class="use-card"> 
+      <span>1</span>
+    <p>Pour vous enregistrer sur notre plateforme et profiter.</p>
+    </div>
+  </div>
+  <div class="contain">
+    <div class="part">
+      <div class="mot"><div class="point"><span class="pulse"></span><span class="pulse"></span><span class="pulse"></span></div><p>Cliquez ici -></p></div>
+      <div class="show">
+        <img src="images/capture.png" alt="">
+      </div>
+    </div>
+    <div class="use-card">
+      <span>2</span>
+    <p>Pour importer l'image de l'article que vous voulez vendre .</p>
+    </div>
+  </div>
+  <div class="contain">
+    <div class="part">
+      <div class="mot"><div class="point"><span class="pulse"></span><span class="pulse"></span><span class="pulse"></span></div><p>Saisis ici-></p></div>
+      <div class="show">
+        <img src="images/form-1.png" alt="">
+      </div>
+    </div>
+    <div class="use-card">
+      <span>3</span>
+    <p>Toutes les informations en rapport avec vous et l'artcle en vente.</p>
+    </div>
+  </div>
+  <div class="contain">
+    <div class="part">
+      <div class="mot"><div class="point"><span class="pulse"></span><span class="pulse"></span><span class="pulse"></span></div><p>Cliquez ici -></p></div>
+      <div class="show">
+        <img src="images/publish.png" alt="">
+      </div>
+    </div>
+    <div class="use-card">
+      <span>4</span>
+    <p>Pour publier votre arcticle, afin qu'il soit vu par tous les autres .</p>
+    </div>
+  </div>
+</div>*
+ -->
+
+<!-- ══════════ FORMULAIRE ══════════ -->
+<div id="publishSection">
+  <div class="banner">
+    <div class="section-label"><span class="pulse"></span> Publier une annonce</div>
+    <h2>Publier votre <em>article</em></h2>
+  </div>
+
+  <div class="publish-card" id="import">
+
+    <!-- Upload image -->
+    <div class="upload-zone" id="uploadZone"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="onDrop(event)">
+      <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="onFile(this.files)"/>
+
+      <div class="upload-ph" id="uploadPh">
+        <div class="upload-ring"><span class="upload-ring-inner">📷</span></div>
+        <div class="upload-title">Importe la photo de l'article</div>
+        <div class="upload-hint">
+          Appuie ici pour prendre une photo ou choisir depuis ta galerie<br/>Compatible iPhone &amp; Android
+        </div>
+        <div class="upload-formats">
+          <span class="uf">JPG</span><span class="uf">PNG</span><span class="uf">WEBP</span><span class="uf">HEIC</span>
+        </div>
+      </div>
+
+      <div class="img-preview" id="imgPreview">
+        <img id="previewImg" src="" alt="Aperçu"/>
+        <div class="img-overlay"></div>
+        <button class="change-btn" onclick="resetPhoto(event)">📷 Changer</button>
+      </div>
+    </div>
+
+    <!-- Champs -->
+    <div class="form-body">
+      <div class="form-grid">
+
+        <div class="field span2">
+          <label>Titre de l'annonce <span class="req">*</span></label>
+          <input class="inp" id="f-title" type="text" maxlength="80"
+            placeholder="Ex : MacBook Air M1, Livre Droit L2, Nike Air Force…"/>
+        </div>
+
+        <div class="field">
+          <label>Nom du vendeur <span class="req">*</span></label>
+          <input class="inp" id="f-seller" type="text" maxlength="40" placeholder="Prénom NOM"/>
+        </div>
+
+        <div class="field">
+          <label>Prix <span class="req">*</span></label>
+          <div class="price-wrap">
+            <input class="inp" id="f-price" type="number" min="0" max="9999" step="500" placeholder="0 Fcfa"/>
+          </div>
+        </div>
+
+        <div class="field span2">
+          <label>Description</label>
+          <textarea class="txta" id="f-desc" maxlength="300"
+            placeholder="Décris l'article : contenu, défauts, raison de la vente…"></textarea>
+        </div>
+
+        <div class="field span2">
+          <label>État de l'article <span class="req">*</span></label>
+          <div class="cond-row" id="condRow">
+            <button class="cond-pill" data-val="Neuf" onclick="pickCond(this)"><span>✨</span><small>Neuf</small></button>
+            <button class="cond-pill" data-val="Très bon" onclick="pickCond(this)"><span>👍</span><small>Très bon</small></button>
+            <button class="cond-pill" data-val="Bon état" onclick="pickCond(this)"><span>🙂</span><small>Bon état</small></button>
+            <button class="cond-pill" data-val="Correct" onclick="pickCond(this)"><span>😐</span><small>Correct</small></button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Catégorie <span class="req">*</span></label>
+          <select class="sel" id="f-cat">
+            <option value="">— Choisir —</option>
+            <option value="📚 Livres & Cours">📚 Livres &amp; Cours</option>
+            <option value="💻 High-Tech">💻 High-Tech</option>
+            <option value="👗 Mode">👗 Mode</option>
+            <option value="⚽ Sport">⚽ Sport &amp; Loisirs</option>
+            <option value="🛠️ Services">🛠️ Services</option>
+            <option value="🎮 Digital">🎮 Digital</option>
+            <option value="🏠 Logement">🏠 Logement</option>
+            <option value="🎨 Art">🎨 Art &amp; Créations</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Mode de remise</label>
+          <select class="sel" id="f-delivery">
+            <option value="🤝 Main propre">🤝 Main propre (campus)</option>
+            <option value="📦 Livraison">📦 Livraison possible</option>
+          </select>
+        </div>
+
+        <div class="field span2">
+          <label>Faculté du vendeur</label>
+          <div class="fac-row" id="facRow">
+            <button class="fac-pill" data-val="Droit" onclick="pickFac(this)"><span>⚖️</span><small>Droit</small></button>
+            <button class="fac-pill" data-val="Sciences" onclick="pickFac(this)"><span>🔬</span><small>Sciences</small></button>
+            <button class="fac-pill" data-val="Lettres" onclick="pickFac(this)"><span>📖</span><small>Lettres</small></button>
+            <button class="fac-pill" data-val="Informatique" onclick="pickFac(this)"><span>💻</span><small>Informatique</small></button>
+            <button class="fac-pill" data-val="Économie" onclick="pickFac(this)"><span>📊</span><small>Économie</small></button>
+            <button class="fac-pill" data-val="Arts" onclick="pickFac(this)"><span>🎨</span><small>Arts</small></button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="submit-row">
+        <button class="btn-pub" onclick="publish()">📢 Publier l'annonce</button>
+        <button class="btn-reset" onclick="resetForm()">Réinitialiser</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+  <script src="js/script.js"></script>
+
+</body>
+</html>
