@@ -87,7 +87,7 @@ async function chargerAnnonces() {
   try {
     // Remplacer "annonces" par l'URL complète de ton serveur Node
     const response = await fetch(
-      "http://localhost:3000/annonces"
+      "/annonces"
     );
 
     const data = await response.json();
@@ -172,7 +172,7 @@ async function publish(){
       formData.append("images", currentFile);
 
       const response = await fetch(
-        "http://localhost:3000/upload",
+        "/upload",
         {
           method: "POST",
           body: formData
@@ -237,7 +237,7 @@ async function publish(){
 
 
   const response = await fetch(
-    "http://localhost:3000/annonces",
+    "/annonces",
     {
       method: "POST",
       headers: {
@@ -354,7 +354,7 @@ async function(e){
 
         const response =
         await fetch(
-        "http://localhost:3000/inscription",
+        "/inscription",
         {
             method:"POST",
 
@@ -404,7 +404,7 @@ async function connexion() {
     try {
 
         const response = await fetch(
-            "http://localhost:3000/connexion",
+            "/connexion",
             {
                 method: "POST",
 
@@ -534,7 +534,7 @@ function makeCard(a,i){
     <div class="card-img">
       ${a.img
         // ? `<img src="${a.img}" alt="${esc(a.title)}"/>`
-        ? `<img src="http://localhost:3000${a.img}" alt="${esc(a.title)}"/>`  
+        ? `<img src="${a.img}" alt="${esc(a.title)}"/>`  
         : `<div class="card-placeholder">🏷️</div>`}
       <div class="card-img-grad"></div>
       <span class="card-cond ${condClass}">${esc(a.condition)}</span>
@@ -754,7 +754,7 @@ function makeCompteItem(a){
 
   d.innerHTML = `
     ${a.img
-      ? `<img src="http://localhost:3000${a.img}" alt="${esc(a.title)}"/>`
+      ? `<img src="${a.img}" alt="${esc(a.title)}"/>`
       : `<div class="ci-ph">🏷️</div>`}
     <div class="ci-info">
       <div class="ci-title">${esc(a.title)}</div>
