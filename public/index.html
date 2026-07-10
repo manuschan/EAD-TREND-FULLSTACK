@@ -5,10 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Theme Switch Pro</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Sail&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Playwrite+IS:wght@400;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
 
   <link rel="stylesheet" href="css/style.css">
   
@@ -65,12 +64,17 @@
 
     transform: scale(1);
 
-    animation: smoothSlider 16s infinite;
+    /* 5 calques, chacun occupe 1/5 du cycle (20%) : la durée totale et le
+       délai de chaque calque sont calculés pour qu'un calque termine son
+       fondu de sortie exactement quand le suivant commence le sien —
+       plus aucun "trou" où rien n'est visible. */
+    animation: smoothSlider 30s infinite;
+    will-change: opacity, transform;
 
     z-index: 1;
 }
 
-/* Images */
+/* Images — 5 calques, délais espacés uniformément (30s / 5 = 6s) */
 .bg1{
     background-image: url("images/shoes.jpeg");
     animation-delay: 0s;
@@ -78,15 +82,26 @@
 
 .bg2{
     background-image: url("images/Unity in Diversity_ A Casual Assembly of Sneakers.png");
-    animation-delay: 8s;
+    animation-delay: 6s;
 }
 
 .bg3{
     background-image: url("images/electro.png");
-    animation-delay: 16s;
+    animation-delay: 12s;
 }
 
-/* VRAIE transition fluide */
+.bg4{
+    background-image: url("images/transaction.png");
+    animation-delay: 18s;
+}
+
+.bg5{
+    background-image: url("images/Organized Wardrobe.png");
+    animation-delay: 24s;
+}
+
+/* VRAIE transition fluide — le fondu de sortie (16%→20%) d'un calque
+   chevauche exactement le fondu d'entrée (0%→2%) du calque suivant */
 @keyframes smoothSlider{
 
     0%{
@@ -94,16 +109,16 @@
         transform: scale(1);
     }
 
-    8%{
+    2%{
         opacity: 1;
     }
 
-    20%{
+    16%{
         opacity: 1;
         transform: scale(1.08);
     }
 
-    28%{
+    20%{
         opacity: 0;
         transform: scale(1.12);
     }
@@ -202,24 +217,15 @@
       </div>
 
     
-      <div class="compte-stats">
-        <div class="compte-stat">
-          <strong id="statAnnonces">0</strong>
-          <span>Annonces</span>
-        </div>
-        <div class="compte-stat">
-          <strong id="statFavoris">0</strong>
-          <span>Mes favoris</span>
-        </div>
-      </div>
-
-      <div class="divider">
-        <div class="div-line"></div><div class="div-dot"></div><div class="div-line"></div>
-      </div>
-
       <div class="compte-tabs">
-        <button class="compte-tab on" data-tab="annonces" onclick="setCompteTab(this)">🏷️ Mes annonces</button>
-        <button class="compte-tab" data-tab="favoris" onclick="setCompteTab(this)">❤️ Favoris</button>
+        <button class="compte-tab on" data-tab="annonces" onclick="setCompteTab(this)">
+          <strong id="statAnnonces">0</strong>
+          <span>🏷️ Mes annonces</span>
+        </button>
+        <button class="compte-tab" data-tab="favoris" onclick="setCompteTab(this)">
+          <strong id="statFavoris">0</strong>
+          <span>❤️ Favoris</span>
+        </button>
       </div>
 
       <div class="compte-body" id="compteBody">
@@ -330,19 +336,19 @@
     <div class="scroll-content">
       <div class="choices">
         <img src="images/chaussures.png" alt="">
-        <a href="">Chaussures</a>
+        <a href="#sold" onclick="filtrerDepuisScroll(event,'👗 Mode')">Chaussures</a>
       </div>
       <div class="choices">
         <img src="images/vetements.png" alt="">
-        <a href="">vêtements</a>
+        <a href="#sold" onclick="filtrerDepuisScroll(event,'👗 Mode')">vêtements</a>
       </div>
       <div class="choices">
         <img src="images/electro (1).png" alt="">
-        <a href="">Électroniques</a>
+        <a href="#sold" onclick="filtrerDepuisScroll(event,'💻 High-Tech')">Électroniques</a>
       </div>
       <div class="choices">
         <img src="images/Organized Wardrobe.png" alt="">
-        <a href="">Autres...</a>
+        <a href="#sold" onclick="filtrerDepuisScroll(event,'all')">Autres...</a>
       </div>
     </div>
   </section>
@@ -557,15 +563,9 @@
         </div>
 
         <div class="field span2">
-          <label>Faculté du vendeur</label>
-          <div class="fac-row" id="facRow">
-            <button class="fac-pill" data-val="Droit" onclick="pickFac(this)"><span>⚖️</span><small>Droit</small></button>
-            <button class="fac-pill" data-val="Sciences" onclick="pickFac(this)"><span>🔬</span><small>Sciences</small></button>
-            <button class="fac-pill" data-val="Lettres" onclick="pickFac(this)"><span>📖</span><small>Lettres</small></button>
-            <button class="fac-pill" data-val="Informatique" onclick="pickFac(this)"><span>💻</span><small>Informatique</small></button>
-            <button class="fac-pill" data-val="Économie" onclick="pickFac(this)"><span>📊</span><small>Économie</small></button>
-            <button class="fac-pill" data-val="Arts" onclick="pickFac(this)"><span>🎨</span><small>Arts</small></button>
-          </div>
+          <label>Filière de l'étudiant·e</label>
+          <input class="inp" id="f-faculte" type="text" maxlength="60"
+            placeholder="Ex : Droit privé, Génie informatique, Sciences économiques…"/>
         </div>
 
       </div>

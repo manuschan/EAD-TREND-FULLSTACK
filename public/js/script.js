@@ -69,12 +69,10 @@ let articles = [];
 let currentImg = null;      // aperçu
 let currentFile = null;     // fichier réel
 let condition  = null;
-let faculty    = null;
 let currentFilter = 'all';
 let favs = new Set();
 
 const COLORS = ['#b5814a','#c78238','#9f682d','#774e22','#6d4e2c','#91673b','#966c36'];
-const FAC_EMOJI = {Droit:'⚖️',Sciences:'🔬',Lettres:'📖',Informatique:'💻',Économie:'📊',Arts:'🎨'};
 
 
 /* =========================
@@ -153,6 +151,7 @@ async function publish(){
   const seller = document.getElementById('f-seller').value.trim();
   const price  = document.getElementById('f-price').value.trim();
   const cat    = document.getElementById('f-cat').value;
+  const faculte = document.getElementById('f-faculte').value.trim();
 
   if(!title)    { toast('⚠️ Entre un titre'); return; }
   if(!seller)   { toast('⚠️ Entre le nom du vendeur'); return; }
@@ -210,7 +209,7 @@ async function publish(){
     cat,
     condition,
 
-    faculty: faculty || null,
+    faculty: faculte || null,
 
     delivery: document.getElementById('f-delivery').value,
 
@@ -494,28 +493,34 @@ function pickCond(btn){
   btn.classList.add('on');
   condition = btn.dataset.val;
 }
-function pickFac(btn){
-  document.querySelectorAll('#facRow .fac-pill').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  faculty = btn.dataset.val;
-}
 
 
 function resetForm(){
-  ['f-title','f-seller','f-price','f-desc'].forEach(id=>document.getElementById(id).value='');
+  ['f-title','f-seller','f-price','f-desc','f-faculte'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-cat').value = '';
   document.getElementById('f-delivery').selectedIndex = 0;
-  document.querySelectorAll('.cond-pill,.fac-pill').forEach(b=>b.classList.remove('on'));
-  condition = null; faculty = null;
+  document.querySelectorAll('.cond-pill').forEach(b=>b.classList.remove('on'));
+  condition = null;
   resetPhoto();
 }
 
 /* ══ Filter ══ */
 function setFilter(btn){
   currentFilter = btn.dataset.filter;
-  document.querySelectorAll('.market-controls .chip').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
+  // On retrouve et surligne le vrai chip correspondant, même si l'appel
+  // vient d'ailleurs qu'un clic direct dessus (ex: liens .scroll-content)
+  document.querySelectorAll('.market-controls .chip').forEach(b=>{
+    b.classList.toggle('on', b.dataset.filter === currentFilter);
+  });
   renderGrid();
+}
+
+/* Permet aux liens du carrousel .scroll-content de filtrer les annonces
+   exactement comme les chips de .market-controls */
+function filtrerDepuisScroll(e, filtre){
+  e.preventDefault();
+  setFilter({ dataset: { filter: filtre } });
+  document.getElementById('marketSection').scrollIntoView({ behavior:'smooth' });
 }
 
 
@@ -525,7 +530,7 @@ function makeCard(a,i){
     'Bon état':'cond-bon','Correct':'cond-correct'
   }[a.condition]||'cond-bon';
 
-  const facEmoji = a.faculty ? (FAC_EMOJI[a.faculty]||'🎓') : null;
+  const facEmoji = a.faculty ? '🎓' : null;
 
   const d = document.createElement('div');
   d.className='card';
@@ -773,30 +778,4 @@ function deconnexion(){
   toast("👋 Déconnecté(e)");
   majUIConnecte();
 }
-
-/* 
-(function(){
-  [
-    {title:'Pack manuels Licence 2 Droit',seller:'Camille Bernard',price:24,
-     desc:'Lot de 3 livres, quelques annotations au crayon.',
-     cat:'📚 Livres & Cours',condition:'Bon état',faculty:'Droit',delivery:'🤝 Main propre'},
-    {title:'MacBook Air M1 — 8Go / 256Go',seller:'Thomas Moreau',price:680,
-     desc:'Vendu avec chargeur MagSafe. Quelques micro-rayures sur le boîtier.',
-     cat:'💻 High-Tech',condition:'Très bon',faculty:'Informatique',delivery:'🤝 Main propre'},
-    {title:'Nike Air Force 1 Blanc — T.42',seller:'Sophie Chen',price:60,
-     desc:'Portées 2-3 fois. Boîte d\'origine incluse.',
-     cat:'👗 Mode',condition:'Très bon',faculty:'Économie',delivery:'📦 Livraison'},
-  ].forEach(s=>{
-    articles.push({
-      ...s, id:Date.now()+Math.random(), img:null,
-      color:COLORS[Math.floor(Math.random()*COLORS.length)],
-      initials:s.seller.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2),
-      ts:Date.now(),
-    });
-  });
-  renderGrid();
-})();
-
-*/ 
-
 
