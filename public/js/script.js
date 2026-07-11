@@ -568,7 +568,6 @@ function makeCard(a,i){
 
     <div class="card-foot">
       <button class="btn-add" onclick="toast('🛒 Ajouté au panier !')">+ Panier</button>
-      <button class="btn-msg" title="Contacter">💬</button>
     </div>
   `;
   return d;

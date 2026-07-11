@@ -150,7 +150,8 @@ body{
   justify-content: center;
   align-items: center;
   display: flex;
-  background: green;
+  background: rgb(3, 78, 3);
+  color:var(--t50);
   box-shadow: 0 0 4px var(--t950);
   animation: fadeIn 1.2s ease-in-out;
 }
@@ -524,6 +525,9 @@ to{
   box-shadow:  6px 4px 1px rgba(0, 0, 0, 0.541);
   margin: 0 .5em;
 }
+.properties p{
+  font-weight: 800;
+}
 .properties div{
   text-align: center;
   align-items: center;
@@ -532,6 +536,7 @@ to{
   border-radius: 16px;
   padding: 8px 16px;
   color: black;
+  border: .1em var(--bg100) solid;
 }
 .point{
   margin-bottom: 0;
@@ -819,10 +824,10 @@ h1, h2, h3, h4, h5{
   font-family:'Space Grotesk',sans-serif;
   font-weight:700;
 }
-h1{ font-size:clamp(1.8rem, 5vw + 1rem, 3.4rem); }
-h2{ font-size:clamp(1.4rem, 4vw + .7rem, 2.6rem); }
-h3{ font-size:clamp(1.15rem, 3vw + .5rem, 1.9rem); }
-h4{ font-size:clamp(1rem, 2vw + .5rem, 1.45rem); }
+h1{ font-size:clamp(2.6rem, 5vw + 1rem, 3.4rem); }
+h2{ font-size:clamp(2.3rem, 4vw + .7rem, 2.6rem) !important; }
+h3{ font-size:clamp(1.6rem, 3vw + .5rem, 1.9rem); }
+h4{ font-size:clamp(1.2rem, 2vw + .5rem, 1.45rem); }
 h5{ font-size:clamp(.8rem, 1.2vw + .5rem, 1.05rem); }
 
 .container{
@@ -1027,13 +1032,14 @@ small {
 }
 .pop-up form{
   width: 500px;
+  justify-content: center;
+  align-item: center;
+  flex-direction: column;
 }
 .pop-up form input{
   width: 320px;
 }
-.close-btn{
-  transform: translateX(216px);
-}
+
 
 
 

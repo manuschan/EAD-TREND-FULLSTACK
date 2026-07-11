@@ -64,11 +64,7 @@
 
     transform: scale(1);
 
-    /* 5 calques, chacun occupe 1/5 du cycle (20%) : la durée totale et le
-       délai de chaque calque sont calculés pour qu'un calque termine son
-       fondu de sortie exactement quand le suivant commence le sien —
-       plus aucun "trou" où rien n'est visible. */
-    animation: smoothSlider 30s infinite;
+    animation: smoothSlider 10s infinite;
     will-change: opacity, transform;
 
     z-index: 1;
@@ -82,26 +78,24 @@
 
 .bg2{
     background-image: url("images/Unity in Diversity_ A Casual Assembly of Sneakers.png");
-    animation-delay: 6s;
+    animation-delay: 2s;
 }
 
 .bg3{
     background-image: url("images/electro.png");
-    animation-delay: 12s;
+    animation-delay: 4s;
 }
 
 .bg4{
     background-image: url("images/transaction.png");
-    animation-delay: 18s;
+    animation-delay: 6s;
 }
 
 .bg5{
     background-image: url("images/Organized Wardrobe.png");
-    animation-delay: 24s;
+    animation-delay: 8s;
 }
 
-/* VRAIE transition fluide — le fondu de sortie (16%→20%) d'un calque
-   chevauche exactement le fondu d'entrée (0%→2%) du calque suivant */
 @keyframes smoothSlider{
 
     0%{
@@ -148,8 +142,8 @@
             <span></span>                
         </label>
       <div class="connection">
-        <button onclick="showDescription('inscription')" class="subscriber" id="navSignup">Sign up</button>
-        <button onclick="showDescription('connexion')" class="subscriber" id="navLogin">Login</button>
+        <button onclick="showDescription('inscription')" class="subscriber" id="navSignup">Inscription</button>
+        <button onclick="showDescription('connexion')" class="subscriber" id="navLogin">Connection</button>
         <button onclick="showDescription('moncompte')" class="subscriber compte-btn" id="navAccount" style="display:none">
           <span class="compte-ava" id="navAvatar">?</span>
           <span id="navName">Mon compte</span>
