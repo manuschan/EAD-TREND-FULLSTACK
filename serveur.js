@@ -163,7 +163,7 @@ app.post("/connexion", (req, res) => {
 
 
 
-// route vers le dossiers annonces
+// route vers la table annonces
 app.get('/annonces', (req, res) => {
     // On trie par date_creation décroissante pour avoir les plus récentes en premier
     const sql = 'SELECT * FROM annonces ORDER BY date_creation DESC';

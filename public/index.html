@@ -7,13 +7,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playwrite+CO:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/style.css">
   
   <style>
 .hero{
-  background: url(images/shoes.jpeg) fixed;  
+  background: url(images/shoes.webp) fixed;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -43,9 +43,9 @@
     background:
     linear-gradient(
         to right,
-        rgba(0,0,0,0.75),
-        rgba(0,0,0,0.45),
-        rgba(0,0,0,0.70)
+        rgba(0, 0, 0, 0.801),
+        rgba(0, 0, 0, 0.507),
+        rgba(0, 0, 0, 0.76)
     );
 
     z-index: 2;
@@ -59,41 +59,35 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-
+    background-attachment: fixed;
     opacity: 0;
 
     transform: scale(1);
 
     animation: smoothSlider 10s infinite;
-    will-change: opacity, transform;
 
     z-index: 1;
 }
 
 /* Images — 5 calques, délais espacés uniformément (30s / 5 = 6s) */
 .bg1{
-    background-image: url("images/shoes.jpeg");
+    background-image: url("images/electro.webp");
     animation-delay: 0s;
 }
 
 .bg2{
-    background-image: url("images/Unity in Diversity_ A Casual Assembly of Sneakers.png");
-    animation-delay: 2s;
+    background-image: url("images/electro.webp");
+    animation-delay: 3s;
 }
 
 .bg3{
-    background-image: url("images/electro.png");
-    animation-delay: 4s;
-}
-
-.bg4{
-    background-image: url("images/transaction.png");
+    background-image: url("images/vetements.webp");
     animation-delay: 6s;
 }
 
-.bg5{
-    background-image: url("images/Organized Wardrobe.png");
-    animation-delay: 8s;
+.bg4{
+    background-image: url("images/vetements.webp");
+    animation-delay: 9s;
 }
 
 @keyframes smoothSlider{
@@ -236,12 +230,11 @@
 
 
 
-  <main id="hero" class="hero" style=" background: url(images/shoes.jpeg) fixed; background-position: center; background-repeat: no-repeat; background-size: cover;">
+  <main id="hero" class="hero">
     <div class="bg bg1"></div>
     <div class="bg bg2"></div>
     <div class="bg bg3"></div>
     <div class="bg bg4"></div>
-    <div class="bg bg5"></div>
     <div class="bref">
       <div class="section-label"><span class="pulse"></span>Plateforme E.A.D de ventes</div>
       <h2>Achète & vends <br> entre <span>étudiants</span></h2>
@@ -272,56 +265,42 @@
       </div>
     </div>
     <div class="gallery">
-      <img src="images/transaction.png" alt="">
-      <img src="images/chaussures_1.png" alt="">
-      <img src="images/Organized Wardrobe.png" alt="">
-      <img src="images/electro (1).png" alt="">
+      <img src="images/transaction.webp" alt="">
+      <img src="images/chaussures_1.webp" alt="">
+      <img src="images/Organized-Wardrobe.webp" alt="">
+      <img src="images/electro-_1_.webp" alt="">
     </div>
 
   </main>
       <div class="banner">
-        <div class="section-label" style="margin-bottom:.6rem"><span class="pulse"></span> Annonces actives</div>
+        <div class="section-label" style="margin-bottom:.6rem"><span class="pulse"></span> Un peu plus sur nous</div>
         <h2>À propos <em>de nous</em></h2>
       </div>
     <section class="about">
       <div class="about-1">
         <div class="point"><span class="pulse"></span><span class="pulse"></span><span class="pulse"></span></div>
         <p>
-          <h4>Vends facilement <br> tes articles</h4>
+          <h3>Vends facilement <br> tes articles</h3>
           Ajoute tes photo, fixe ton prix, et touche des acheteurs <br> rapidement.
         </p>
-        <img src="images/clique.png" alt="">
+        <img src="images/Catalogue-cuate_1_.webp" alt="">
       </div>
-      <div class="about-2">
+      <div class="about-2"> 
         <div class="point"><span class="pulse"></span><span class="pulse"></span><span class="pulse"></span></div>
         <p>
-          <h4>Achète malin et <br> économise plus</h4>
-          Des mmiliers d'articles en bon état, jusqu'à -70% du prix neuf.
+          <h3>Achète malin et <br> économise plus</h3>
+          Des miliers d'articles en bon état, jusqu'à -70% du prix neuf.
         </p>
-        <img src="images/claque.png" alt="">
+        <img src="images/sneak_2_1_.webp" alt="">
       </div>
       <div class="about-3">
         <div class="point"><span class="pulse"></span><span class="pulse"></span><span class="pulse"></span></div>
         <p>
-          <h4>Échange <br> en toute sécurité</h4>
-          paiements sécurisés, messagerie intégrée et système de notation.
+          <h3>Échange <br> en toute sécurité</h3>
+          Échange facilement avec les acheteurs/vendeurs.
+          messagerie intégrée, système de favoris et de réservation.
         </p>
-        <div class="block">
-          <div>
-            <i class="fa-solid fa-handshake"></i>
-            <p>
-              <span>Messagerie intégrée</span> <br>
-              Échange facilement avec les Acheteurs/Vendeurs
-            </p>
-          </div>
-          <div>
-            <i class="fa-solid fa-handshake"></i>
-            <p>
-              <span>Membres notés</span> <br>
-              Achète et vends en confiance
-            </p>
-          </div>
-        </div>
+        <img src="images/sms_1_1_.webp" alt="">
       </div>
     </section>
 
@@ -329,19 +308,19 @@
   <section class="scroll-container">
     <div class="scroll-content">
       <div class="choices">
-        <img src="images/chaussures.png" alt="">
+        <img src="images/chaussures.webp" alt="">
         <a href="#sold" onclick="filtrerDepuisScroll(event,'👗 Mode')">Chaussures</a>
       </div>
       <div class="choices">
-        <img src="images/vetements.png" alt="">
+        <img src="images/vetements.webp" alt="">
         <a href="#sold" onclick="filtrerDepuisScroll(event,'👗 Mode')">vêtements</a>
       </div>
       <div class="choices">
-        <img src="images/electro (1).png" alt="">
+        <img src="images/electro-_1_.webp">
         <a href="#sold" onclick="filtrerDepuisScroll(event,'💻 High-Tech')">Électroniques</a>
       </div>
       <div class="choices">
-        <img src="images/Organized Wardrobe.png" alt="">
+        <img src="images/Organized-Wardrobe.webp" alt="">
         <a href="#sold" onclick="filtrerDepuisScroll(event,'all')">Autres...</a>
       </div>
     </div>
