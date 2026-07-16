@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusMarché — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playwrite+IS:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* Page admin autonome : reprend les variables de couleur de style.css,
+     mais garde sa propre mise en page, indépendante du reste du site. */
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg200);
+    color:var(--t900);
+    margin:0;
+    min-height:100vh;
+  }
+
+  .admin-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:1rem 1.6rem;
+    background:linear-gradient(145deg,var(--p700),var(--p800));
+    color:var(--bg50);
+    box-shadow:0 4px 12px rgba(0,0,0,.25);
+  }
+  .admin-topbar h1{
+    font-family:'Playwrite IS',cursive;
+    font-size:1.3rem;
+    margin:0;
+    font-weight:700;
+  }
+  .admin-topbar .who{
+    font-size:.8rem;
+    display:flex;
+    align-items:center;
+    gap:.8rem;
+  }
+  .admin-topbar button{
+    background:var(--a500);
+    color:var(--t950);
+    border:none;
+    padding:.4rem .9rem;
+    border-radius:10px;
+    font-weight:700;
+    cursor:pointer;
+    font-size:.75rem;
+  }
+
+  /* ─── Écran de connexion ─── */
+  #loginScreen{
+    max-width:380px;
+    margin:8vh auto;
+    background:var(--bg50);
+    border:1px solid var(--t950);
+    border-radius:20px;
+    padding:2rem 1.6rem;
+    box-shadow:0 10px 30px rgba(0,0,0,.2);
+  }
+  #loginScreen h2{
+    margin-top:0;
+    font-family:'Playwrite IS',cursive;
+    color:var(--p700);
+  }
+  #loginScreen input{
+    width:100%;
+    box-sizing:border-box;
+    padding:.7rem .9rem;
+    margin-bottom:.7rem;
+    border-radius:12px;
+    border:1px solid var(--t300);
+    background:var(--bg100);
+    color:var(--t900);
+    font-size:.85rem;
+  }
+  #loginScreen button{
+    width:100%;
+    padding:.7rem;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(145deg,var(--a400),var(--a600));
+    color:var(--t950);
+    font-weight:800;
+    cursor:pointer;
+  }
+  #loginError{
+    color:#b3261e;
+    font-size:.78rem;
+    margin-top:.4rem;
+    min-height:1em;
+  }
+
+  /* ─── Dashboard ─── */
+  #dashboard{ display:none; padding:1.4rem; max-width:1200px; margin:0 auto; }
+
+  .filtres{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.4rem;
+    margin-bottom:1.2rem;
+  }
+  .filtre-chip{
+    border:1px solid var(--t950);
+    background:var(--bg50);
+    color:var(--t700);
+    padding:.35rem .8rem;
+    border-radius:14px;
+    font-size:.72rem;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .filtre-chip.on{
+    background:linear-gradient(145deg,var(--a400),var(--a600));
+    color:var(--t950);
+    border-color:transparent;
+  }
+
+  .commande-card{
+    background:var(--bg50);
+    border:1px solid var(--t950);
+    border-radius:18px;
+    padding:1rem 1.2rem;
+    margin-bottom:1rem;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+  }
+  .cc-head{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    gap:.6rem;
+    align-items:center;
+    margin-bottom:.7rem;
+  }
+  .cc-titre{
+    font-weight:800;
+    font-size:.95rem;
+  }
+  .cc-prix{
+    font-weight:800;
+    color:var(--a600);
+  }
+  .badge-statut{
+    display:inline-block;
+    padding:.25rem .7rem;
+    border-radius:10px;
+    font-size:.65rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    color:#fff;
+  }
+  .cc-parties{
+    display:flex;
+    flex-wrap:wrap;
+    gap:1.4rem;
+    font-size:.78rem;
+    color:var(--t700);
+    margin-bottom:.8rem;
+  }
+  .cc-parties strong{ color:var(--t900); }
+  .cc-dates{
+    font-size:.68rem;
+    color:var(--t500);
+    margin-bottom:.7rem;
+    display:flex;
+    flex-wrap:wrap;
+    gap:.9rem;
+  }
+  .cc-notes{
+    width:100%;
+    box-sizing:border-box;
+    border:1px solid var(--t300);
+    border-radius:10px;
+    padding:.5rem .7rem;
+    font-size:.75rem;
+    font-family:inherit;
+    background:var(--bg100);
+    color:var(--t900);
+    resize:vertical;
+    min-height:2.2em;
+    margin-bottom:.7rem;
+  }
+  .cc-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.5rem;
+  }
+  .btn-action{
+    border:none;
+    border-radius:10px;
+    padding:.45rem .9rem;
+    font-size:.72rem;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btn-suivant{ background:var(--a500); color:var(--t950); }
+  .btn-notes{ background:var(--p200); color:var(--t900); }
+  .btn-litige{ background:#e0a13a; color:#3a2400; }
+  .btn-annuler{ background:#d9534f; color:#fff; }
+
+  .vide{
+    text-align:center;
+    color:var(--t500);
+    padding:3rem 1rem;
+    font-size:.85rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="admin-topbar">
+  <h3>🛠️ CampusMarché — Admin</h3>
+  <div class="who" id="topbarWho" style="display:none">
+    <span id="adminNom"></span>
+    <button onclick="deconnexionAdmin()">Se déconnecter</button>
+  </div>
+</div>
+
+<!-- ═══ Écran de connexion ═══ -->
+<div id="loginScreen">
+  <h2>Connexion admin</h2>
+  <input type="email" id="adminEmail" placeholder="E-mail">
+  <input type="password" id="adminPassword" placeholder="Mot de passe">
+  <button onclick="connexionAdmin()">Se connecter</button>
+  <div id="loginError"></div>
+</div>
+
+<!-- ═══ Dashboard ═══ -->
+<div id="dashboard">
+
+  <div class="filtres" id="filtres">
+    <button class="filtre-chip on" data-statut="" onclick="setFiltre(this)">Toutes</button>
+    <button class="filtre-chip" data-statut="reservee" onclick="setFiltre(this)">Réservée</button>
+    <button class="filtre-chip" data-statut="depot_attendu" onclick="setFiltre(this)">Dépôt attendu</button>
+    <button class="filtre-chip" data-statut="objet_recu" onclick="setFiltre(this)">Objet reçu</button>
+    <button class="filtre-chip" data-statut="objet_verifie" onclick="setFiltre(this)">Objet vérifié</button>
+    <button class="filtre-chip" data-statut="paiement_recu" onclick="setFiltre(this)">Paiement reçu</button>
+    <button class="filtre-chip" data-statut="remise_acheteur" onclick="setFiltre(this)">Remise acheteur</button>
+    <button class="filtre-chip" data-statut="vendeur_paye" onclick="setFiltre(this)">Vendeur payé</button>
+    <button class="filtre-chip" data-statut="litige" onclick="setFiltre(this)">⚠️ Litige</button>
+    <button class="filtre-chip" data-statut="annulee" onclick="setFiltre(this)">Annulée</button>
+  </div>
+
+  <div id="listeCommandes"></div>
+
+</div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

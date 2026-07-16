@@ -538,7 +538,6 @@ function makeCard(a,i){
   d.innerHTML=`
     <div class="card-img">
       ${a.img
-        // ? `<img src="${a.img}" alt="${esc(a.title)}"/>`
         ? `<img src="${a.img}" alt="${esc(a.title)}"/>`  
         : `<div class="card-placeholder">🏷️</div>`}
       <div class="card-img-grad"></div>
@@ -567,10 +566,117 @@ function makeCard(a,i){
     </div>
 
     <div class="card-foot">
-      <button class="btn-add" onclick="toast('🛒 Ajouté au panier !')">+ Panier</button>
+      <button class="btn-add" ${a.statut !== 'disponible' ? 'disabled' : `onclick="ouvrirConfirmationAchat(${a.id})"`}>
+        ${a.statut === 'reservee' ? '⏳ Réservé' : a.statut === 'vendue' ? '✔ Vendu' : '+ Panier'}
+      </button>
+      <button class="btn-view" title="Voir la photo" ${a.img ? `onclick="ouvrirImageComplete('${escAttr(a.img)}','${escAttr(a.title)}')"` : 'disabled'}>👁️</button>
     </div>
   `;
   return d;
+}
+
+/* ══ Image complète (déclenchée par un clic sur la photo ou le bouton 👁️) ══ */
+function ouvrirImageComplete(src, titre){
+  if(!src) return;
+  document.getElementById('imageCompleteSrc').src = src;
+  document.getElementById('imageCompleteSrc').alt = titre || '';
+  document.getElementById('imageCompleteTitre').textContent = titre || '';
+  showDescription('imageComplete');
+}
+
+/* ══ Panier → pop-up de confirmation → réservation ══ */
+let articleEnAttenteAchat = null;
+
+function ouvrirConfirmationAchat(id){
+
+  const u = getUtilisateur();
+  if(!u){
+    toast('⚠️ Connecte-toi pour réserver un article');
+    closePop('confirmAchat');
+    showDescription('connexion');
+    return;
+  }
+
+  const a = articles.find(art => art.id === id);
+  if(!a){
+    toast('❌ Article introuvable');
+    return;
+  }
+
+  if(a.statut && a.statut !== 'disponible'){
+    toast('⚠️ Cet article n\'est plus disponible');
+    return;
+  }
+
+  if(a.userId != null && String(a.userId) === String(u.id)){
+    toast('⚠️ Tu ne peux pas réserver ta propre annonce');
+    return;
+  }
+
+  articleEnAttenteAchat = a;
+
+  document.getElementById('confirmImg').innerHTML = a.img
+    ? `<img src="${a.img}" alt="${esc(a.title)}"/>`
+    : '🏷️';
+  document.getElementById('confirmTitle').textContent = a.title;
+  document.getElementById('confirmPrice').textContent = a.price.toLocaleString('fr-FR') + ' Fcfa';
+  document.getElementById('confirmSeller').textContent = '👤 Vendu par ' + (a.seller || 'Étudiant·e vérifié·e');
+
+  const btn = document.getElementById('btnConfirmerAchat');
+  btn.disabled = false;
+  btn.textContent = 'Oui, je réserve';
+
+  showDescription('confirmAchat');
+}
+
+async function confirmerReservation(){
+
+  const u = getUtilisateur();
+  const a = articleEnAttenteAchat;
+  if(!u || !a) return;
+
+  const btn = document.getElementById('btnConfirmerAchat');
+  btn.disabled = true;
+  btn.textContent = 'Réservation…';
+
+  try{
+
+    const response = await fetch('/commandes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        annonce_id: a.id,
+        acheteur_id: u.id,
+        prix_final: a.price
+      })
+    });
+
+    const result = await response.json();
+
+    if(!response.ok){
+      toast('⚠️ ' + (result.message || 'Cet article vient d\'être réservé par quelqu\'un d\'autre'));
+      btn.disabled = false;
+      btn.textContent = 'Oui, je réserve';
+      // On resynchronise avec le serveur au cas où l'article ait changé de statut
+      await chargerAnnonces();
+      renderGrid();
+      return;
+    }
+
+    // Mise à jour locale immédiate pour un retour visuel instantané
+    a.statut = 'reservee';
+    renderGrid();
+
+    closePop('confirmAchat');
+    toast('✅ Article réservé ! Le vendeur va être notifié.');
+
+  }catch(err){
+    console.error(err);
+    toast('❌ Erreur serveur, réessaie plus tard');
+    btn.disabled = false;
+    btn.textContent = 'Oui, je réserve';
+  }
+
 }
 
 function toggleFav(id,btn){
@@ -592,6 +698,17 @@ function toggleFav(id,btn){
 
 function esc(s){
   return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* Comme esc(), mais pensée pour être injectée dans un attribut onclick="...('valeur')" :
+   échappe en plus l'apostrophe (sinon elle casserait la chaîne JS) et le antislash */
+function escAttr(s){
+  return String(s ?? '')
+    .replace(/\\/g,'\\\\')
+    .replace(/'/g,"\\'")
+    .replace(/"/g,'&quot;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
 }
 
 let toastTimer;
@@ -777,4 +894,3 @@ function deconnexion(){
   toast("👋 Déconnecté(e)");
   majUIConnecte();
 }
-

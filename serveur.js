@@ -256,6 +256,272 @@ app.post("/annonces", (req, res) => {
 
 });
 
+/* =========================
+   ADMIN — middleware d'auth
+   (Garde-fou temporaire en attendant le JWT :
+   vérifie juste que l'id envoyé correspond à un compte role='admin')
+========================= */
+function checkAdmin(req, res, next) {
+
+  const adminId = req.header("x-admin-id");
+
+  if (!adminId) {
+    return res.status(401).json({ message: "Authentification admin requise" });
+  }
+
+  db.query(
+    "SELECT id, role FROM utilisateurs WHERE id = ?",
+    [adminId],
+    (err, results) => {
+
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Erreur serveur" });
+      }
+
+      if (results.length === 0 || results[0].role !== "admin") {
+        return res.status(403).json({ message: "Accès refusé" });
+      }
+
+      next();
+    }
+  );
+
+}
+
+/* Ordre des statuts, utilisé pour valider qu'on ne saute pas d'étape
+   n'importe comment depuis le serveur (sécurité minimale côté back) */
+const ORDRE_STATUTS = [
+  "reservee",
+  "depot_attendu",
+  "objet_recu",
+  "objet_verifie",
+  "paiement_recu",
+  "remise_acheteur",
+  "vendeur_paye"
+];
+
+// Colonne date à renseigner automatiquement selon le nouveau statut
+const DATE_PAR_STATUT = {
+  objet_recu: "date_depot",
+  paiement_recu: "date_paiement",
+  remise_acheteur: "date_remise",
+  vendeur_paye: "date_reversement"
+};
+
+/* =========================
+   ADMIN — liste des commandes
+========================= */
+app.get("/admin/commandes", checkAdmin, (req, res) => {
+
+  const { statut } = req.query;
+
+  let sql = `
+    SELECT
+      c.*,
+      a.titre AS annonce_titre,
+      a.image AS annonce_image,
+      ach.nom AS acheteur_nom, ach.prenom AS acheteur_prenom, ach.telephone AS acheteur_tel,
+      ven.nom AS vendeur_nom, ven.prenom AS vendeur_prenom, ven.telephone AS vendeur_tel
+    FROM commandes c
+    LEFT JOIN annonces a ON a.id = c.annonce_id
+    JOIN utilisateurs ach ON ach.id = c.acheteur_id
+    JOIN utilisateurs ven ON ven.id = c.vendeur_id
+  `;
+
+  const params = [];
+
+  if (statut) {
+    sql += " WHERE c.statut_transaction = ?";
+    params.push(statut);
+  }
+
+  sql += " ORDER BY c.date_creation DESC";
+
+  db.query(sql, params, (err, results) => {
+
+    if (err) {
+      console.error("Erreur SQL /admin/commandes :", err);
+      return res.status(500).json({ message: "Erreur serveur" });
+    }
+
+    res.json(results);
+
+  });
+
+});
+
+/* =========================
+   ADMIN — faire avancer / modifier le statut d'une commande
+========================= */
+app.put("/admin/commandes/:id/statut", checkAdmin, (req, res) => {
+
+  const { id } = req.params;
+  const { statut, notes_admin } = req.body;
+
+  const statutsValides = [...ORDRE_STATUTS, "litige", "annulee"];
+
+  if (!statutsValides.includes(statut)) {
+    return res.status(400).json({ message: "Statut invalide" });
+  }
+
+  const colonneDate = DATE_PAR_STATUT[statut];
+
+  let sql = "UPDATE commandes SET statut_transaction = ?";
+  const params = [statut];
+
+  if (colonneDate) {
+    sql += `, ${colonneDate} = NOW()`;
+  }
+
+  if (typeof notes_admin === "string") {
+    sql += ", notes_admin = ?";
+    params.push(notes_admin);
+  }
+
+  sql += " WHERE id = ?";
+  params.push(id);
+
+  db.query(sql, params, (err, result) => {
+
+    if (err) {
+      console.error("Erreur SQL maj statut commande :", err);
+      return res.status(500).json({ message: "Erreur serveur" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Commande introuvable" });
+    }
+
+    // Répercuter sur l'annonce : vendue si transaction terminée,
+    // redevient disponible si annulée ou en litige résolu par annulation
+    if (statut === "vendeur_paye") {
+
+      db.query(
+        `UPDATE annonces a
+         JOIN commandes c ON c.annonce_id = a.id
+         SET a.statut = 'vendue', a.date_vente = NOW()
+         WHERE c.id = ?`,
+        [id],
+        (err2) => { if (err2) console.error("Erreur maj annonce (vendue) :", err2); }
+      );
+
+    } else if (statut === "annulee") {
+
+      db.query(
+        `UPDATE annonces a
+         JOIN commandes c ON c.annonce_id = a.id
+         SET a.statut = 'disponible'
+         WHERE c.id = ?`,
+        [id],
+        (err2) => { if (err2) console.error("Erreur maj annonce (annulee) :", err2); }
+      );
+
+    }
+
+    res.json({ message: "Statut mis à jour" });
+
+  });
+
+});
+
+/* =========================
+   ADMIN — création d'une commande (quand l'acheteur réserve)
+========================= */
+app.post("/commandes", (req, res) => {
+
+  const { annonce_id, acheteur_id, prix_final, commission } = req.body;
+
+  if (!annonce_id || !acheteur_id || !prix_final) {
+    return res.status(400).json({ message: "Champs manquants" });
+  }
+
+  // Transaction SQL réelle : verrouille la ligne le temps de vérifier
+  // la disponibilité ET de créer la commande, pour empêcher que deux
+  // acheteurs réservent le même article en même temps (race condition)
+  db.beginTransaction((errTx) => {
+
+    if (errTx) {
+      console.error(errTx);
+      return res.status(500).json({ message: "Erreur serveur" });
+    }
+
+    db.query(
+      "SELECT utilisateur_id, statut FROM annonces WHERE id = ? FOR UPDATE",
+      [annonce_id],
+      (err, rows) => {
+
+        if (err) {
+          return db.rollback(() => {
+            console.error(err);
+            res.status(500).json({ message: "Erreur serveur" });
+          });
+        }
+
+        if (rows.length === 0) {
+          return db.rollback(() => {
+            res.status(404).json({ message: "Annonce introuvable" });
+          });
+        }
+
+        if (rows[0].statut !== "disponible") {
+          return db.rollback(() => {
+            res.status(409).json({ message: "Cet article n'est plus disponible" });
+          });
+        }
+
+        const vendeur_id = rows[0].utilisateur_id;
+
+        db.query(
+          `INSERT INTO commandes (annonce_id, acheteur_id, vendeur_id, prix_final, commission)
+           VALUES (?, ?, ?, ?, ?)`,
+          [annonce_id, acheteur_id, vendeur_id, prix_final, commission || 0],
+          (err2, result) => {
+
+            if (err2) {
+              return db.rollback(() => {
+                console.error(err2);
+                res.status(500).json({ message: "Erreur lors de la réservation" });
+              });
+            }
+
+            db.query(
+              "UPDATE annonces SET statut = 'reservee' WHERE id = ?",
+              [annonce_id],
+              (err3) => {
+
+                if (err3) {
+                  return db.rollback(() => {
+                    console.error(err3);
+                    res.status(500).json({ message: "Erreur lors de la réservation" });
+                  });
+                }
+
+                db.commit((errCommit) => {
+
+                  if (errCommit) {
+                    return db.rollback(() => {
+                      console.error(errCommit);
+                      res.status(500).json({ message: "Erreur serveur" });
+                    });
+                  }
+
+                  res.json({ message: "Article réservé", id: result.insertId });
+
+                });
+
+              }
+            );
+
+          }
+        );
+
+      }
+    );
+
+  });
+
+});
 
 
 const PORT = process.env.PORT || 3000;

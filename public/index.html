@@ -29,7 +29,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;  
-  padding: .8rem;
+  padding: .6rem;
   isolation: isolate;
   box-shadow:0 24px 40px black;
 }
@@ -65,11 +65,11 @@
     transform: scale(1);
 
     animation: smoothSlider 10s infinite;
-
+    will-change: opacity, transform;
     z-index: 1;
 }
 
-/* Images — 5 calques, délais espacés uniformément (30s / 5 = 6s) */
+
 .bg1{
     background-image: url("images/electro.webp");
     animation-delay: 0s;
@@ -147,7 +147,7 @@
       <nav>
         <div class="link">
           <i class="fa-solid fa-house"></i>
-          <a href="#hero">Accueil</a>
+          <a href="admin.html">Accueil</a>
         </div>
         <div class="link">
           <i class="fa-solid fa-handshake"></i>
@@ -189,6 +189,44 @@
     </form>
   </div>
   
+
+    <!-- ══════ POP-UP IMAGE COMPLÈTE ══════ -->
+  <div class="pop-up" id="imageComplete">
+    <div class="image-panel">
+      <span class="close-btn" onclick="closePop('imageComplete')">&times;</span>
+      <img id="imageCompleteSrc" src="" alt=""/>
+      <div class="image-complete-titre" id="imageCompleteTitre"></div>
+    </div>
+  </div>
+
+  <!-- ══════ POP-UP CONFIRMATION ACHAT ══════ -->
+  <div class="pop-up" id="confirmAchat">
+    <div class="confirm-panel">
+      <span class="close-btn" onclick="closePop('confirmAchat')">&times;</span>
+
+      <h2>Réserver cet article ?</h2>
+
+      <div class="confirm-article">
+        <div class="confirm-img" id="confirmImg">🏷️</div>
+        <div class="confirm-info">
+          <div class="confirm-title" id="confirmTitle">—</div>
+          <div class="confirm-price" id="confirmPrice">—</div>
+          <div class="confirm-seller" id="confirmSeller">—</div>
+        </div>
+      </div>
+
+      <p class="confirm-text">
+        En confirmant, tu réserves cet article. CampusMarché sert d'intermédiaire :
+        le vendeur te déposera l'article, tu le règles à réception, puis on reverse
+        le paiement au vendeur.
+      </p>
+
+      <div class="confirm-actions">
+        <button class="btn-confirm-non" onclick="closePop('confirmAchat')">Annuler</button>
+        <button class="btn-confirm-oui" id="btnConfirmerAchat" onclick="confirmerReservation()">Oui, je réserve</button>
+      </div>
+    </div>
+  </div>
 
 
   <!-- ══════ POP-UP MON COMPTE ══════ -->
