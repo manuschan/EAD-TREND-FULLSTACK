@@ -147,11 +147,11 @@
       <nav>
         <div class="link">
           <i class="fa-solid fa-house"></i>
-          <a href="admin.html">Accueil</a>
+          <a href="#hero">Accueil</a>
         </div>
         <div class="link">
           <i class="fa-solid fa-handshake"></i>
-          <a href="#sold">Services</a>
+          <a href="admin.html">Admin</a>
         </div>
         <div class="link" >
             <i class="fa-solid fa-circle-user"></i>
@@ -589,8 +589,80 @@
   </div>
 </div>
 
+<!-- Divider -->
+<div class="divider">
+  <div class="div-line"></div><div class="div-dot"></div><div class="div-line"></div>
+</div>
+
+<!-- ══════════ AVIS DES UTILISATEURS ══════════ -->
+<div id="avisSection">
+  <div class="market-head">
+    <div>
+      <div class="section-label" style="margin-bottom:.6rem"><span class="pulse"></span> Retours de la communauté</div>
+      <h2>Ce que <em>disent</em> les étudiant·es</h2>
+    </div>
+  </div>
+
+  <div class="avis-form-card">
+    <div class="form-grid">
+
+      <div class="field">
+        <label>Prénom <span class="req">*</span></label>
+        <input class="inp" id="avis-prenom" type="text" maxlength="40" placeholder="Ton prénom"/>
+      </div>
+
+      <div class="field">
+        <label>Nom <span class="req">*</span></label>
+        <input class="inp" id="avis-nom" type="text" maxlength="40" placeholder="Ton nom"/>
+      </div>
+
+      <div class="field span2">
+        <label>Ton avis <span class="req">*</span></label>
+        <textarea class="txta" id="avis-message" maxlength="500"
+          placeholder="Dis-nous ce que tu penses de CampusMarché…"></textarea>
+      </div>
+
+    </div>
+
+    <div class="submit-row">
+      <button class="btn-pub" onclick="publierAvis()">💬 Partager mon avis</button>
+    </div>
+  </div>
+
+  <div class="avis-grid" id="avisGrid"></div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer class="site-footer">
+  <div class="footer-top">
+
+    <div class="footer-brand">
+      <div class="footer-logo">🎓 CampusMarché</div>
+      <p>La marketplace des étudiant·es, main dans la main.</p>
+    </div>
+
+    <div class="footer-col">
+      <h5>Navigation</h5>
+      <a href="#sold">Annonces</a>
+      <a href="#publishSection">Publier une annonce</a>
+      <a href="#avisSection">Avis</a>
+    </div>
+
+    <div class="footer-col">
+      <h5>À propos</h5>
+      <a href="javascript:void(0)" onclick="showDescription('inscription')">Créer un compte</a>
+      <a href="javascript:void(0)" onclick="showDescription('connexion')">Se connecter</a>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <span>© <span id="footerYear"></span> CampusMarché. Tous droits réservés.</span>
+  </div>
+</footer>
 
   <script src="js/script.js"></script>
 

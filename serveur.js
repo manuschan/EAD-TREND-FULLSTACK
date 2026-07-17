@@ -524,11 +524,69 @@ app.post("/commandes", (req, res) => {
 });
 
 
+/* =========================
+   AVIS — retours des utilisateurs sur le site
+========================= */
+app.get('/avis', (req, res) => {
+
+  const sql = 'SELECT * FROM avis ORDER BY date_creation DESC';
+
+  db.query(sql, (err, avis) => {
+
+    if (err) {
+      console.error("Erreur SQL lors de la récupération des avis :", err);
+      return res.status(500).json({ erreur: err.message });
+    }
+
+    res.json(avis);
+
+  });
+
+});
+
+app.post('/avis', (req, res) => {
+
+  const { nom, prenom, message } = req.body;
+
+  const nomPropre = (nom || '').trim();
+  const prenomPropre = (prenom || '').trim();
+  const messagePropre = (message || '').trim();
+
+  if (!nomPropre || !prenomPropre || !messagePropre) {
+    return res.status(400).json({ message: "Merci de remplir le nom, le prénom et le message" });
+  }
+
+  if (messagePropre.length > 500) {
+    return res.status(400).json({ message: "Message trop long (500 caractères maximum)" });
+  }
+
+  const sql = `
+    INSERT INTO avis (nom, prenom, message)
+    VALUES (?, ?, ?)
+  `;
+
+  db.query(
+    sql,
+    [nomPropre, prenomPropre, messagePropre],
+    (err, result) => {
+
+      if (err) {
+        console.error("Erreur SQL lors de l'enregistrement de l'avis :", err);
+        return res.status(500).json({ message: "Erreur lors de l'enregistrement" });
+      }
+
+      res.json({
+        message: "Avis enregistré",
+        id: result.insertId
+      });
+
+    }
+  );
+
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
 });
-
-
-

@@ -66,6 +66,7 @@ function updateIcon() {
 
 /* ══ State ══ */
 let articles = [];
+let avisListe = [];
 let currentImg = null;      // aperçu
 let currentFile = null;     // fichier réel
 let condition  = null;
@@ -94,7 +95,7 @@ async function chargerAnnonces() {
 
     articles = data.map(a => ({
 
-      id: a.id,
+      id: Number(a.id),
 
       userId: a.utilisateur_id,
 
@@ -138,6 +139,127 @@ async function chargerAnnonces() {
       err
     );
 
+  }
+
+}
+
+
+
+/* =========================
+   CHARGEMENT DES AVIS
+========================= */
+async function chargerAvis() {
+
+  try {
+
+    const response = await fetch("/avis");
+    const data = await response.json();
+
+    avisListe = data.map(a => ({
+
+      id: Number(a.id),
+
+      nom: a.nom,
+
+      prenom: a.prenom,
+
+      message: a.message,
+
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+
+      initials: `${(a.prenom||'')[0]||''}${(a.nom||'')[0]||''}`.toUpperCase(),
+
+      date: a.date_creation
+
+    }));
+
+    renderAvisGrid();
+
+  } catch(err) {
+
+    console.error("Erreur chargement avis :", err);
+
+  }
+
+}
+
+/* ══ Carte d'avis — calquée sur makeCard() ══ */
+function makeAvisCard(a){
+  const d = document.createElement('div');
+  d.className = 'avis-card';
+
+  d.innerHTML = `
+    <div class="avis-head">
+      <div class="avis-ava" style="background:${a.color}">${a.initials}</div>
+      <div class="avis-identite">
+        <div class="avis-nom">${esc(a.prenom)} ${esc(a.nom)}</div>
+        <div class="avis-date">${formatDateAvis(a.date)}</div>
+      </div>
+    </div>
+    <div class="avis-message">${esc(a.message)}</div>
+  `;
+  return d;
+}
+
+/* ══ Grille des avis — calquée sur renderGrid() ══ */
+function renderAvisGrid(){
+  const grid = document.getElementById('avisGrid');
+  if(!grid) return;
+
+  grid.innerHTML = '';
+
+  if(avisListe.length === 0){
+    grid.innerHTML = `<div class="avis-empty">Aucun avis pour le moment — sois le premier·e à partager le tien !</div>`;
+    return;
+  }
+
+  avisListe.forEach(a => grid.appendChild(makeAvisCard(a)));
+}
+
+function formatDateAvis(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+/* ══ Publication d'un avis ══ */
+async function publierAvis(){
+
+  const prenom  = document.getElementById('avis-prenom').value.trim();
+  const nom     = document.getElementById('avis-nom').value.trim();
+  const message = document.getElementById('avis-message').value.trim();
+
+  if(!prenom || !nom || !message){
+    toast('⚠️ Renseigne ton prénom, ton nom et ton avis');
+    return;
+  }
+
+  try {
+
+    const response = await fetch('/avis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nom, prenom, message })
+    });
+
+    const result = await response.json();
+
+    if(!response.ok){
+      toast('⚠️ ' + (result.message || "Erreur lors de l'envoi"));
+      return;
+    }
+
+    document.getElementById('avis-prenom').value = '';
+    document.getElementById('avis-nom').value = '';
+    document.getElementById('avis-message').value = '';
+
+    toast('✅ Merci pour ton avis !');
+
+    await chargerAvis();
+
+  } catch(err) {
+    console.error(err);
+    toast('❌ Erreur serveur, réessaie plus tard');
   }
 
 }
@@ -198,6 +320,8 @@ async function publish(){
     id: Date.now(),
 
     userId: getUtilisateur()?.id,
+
+    statut: 'disponible',
 
     title,
     seller,
@@ -536,14 +660,14 @@ function makeCard(a,i){
   d.className='card';
   d.style.animationDelay=(i*.07)+'s';
   d.innerHTML=`
-    <div class="card-img">
+    <div class="card-img" ${a.img ? `onclick="ouvrirImageComplete('${escAttr(a.img)}','${escAttr(a.title)}')" style="cursor:zoom-in"` : ''}>
       ${a.img
-        ? `<img src="${a.img}" alt="${esc(a.title)}"/>`  
+        ? `<img src="${a.img}" alt="${esc(a.title)}"/>`
         : `<div class="card-placeholder">🏷️</div>`}
       <div class="card-img-grad"></div>
       <span class="card-cond ${condClass}">${esc(a.condition)}</span>
       <button class="card-fav ${favs.has(a.id)?'liked':''}"
-        onclick="toggleFav(${a.id},this)">${favs.has(a.id)?'❤️':'🤍'}</button>
+        onclick="event.stopPropagation();toggleFav(${a.id},this)">${favs.has(a.id)?'❤️':'🤍'}</button>
       <span class="price-ribbon">${a.price.toLocaleString('fr-FR')} Fcfa</span>
     </div>
 
@@ -700,8 +824,7 @@ function esc(s){
   return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-/* Comme esc(), mais pensée pour être injectée dans un attribut onclick="...('valeur')" :
-   échappe en plus l'apostrophe (sinon elle casserait la chaîne JS) et le antislash */
+
 function escAttr(s){
   return String(s ?? '')
     .replace(/\\/g,'\\\\')
@@ -723,7 +846,11 @@ function toast(msg){
 
 window.addEventListener("DOMContentLoaded", async () => {
     await chargerAnnonces();
+    await chargerAvis();
     majUIConnecte();
+
+    const anneeFooter = document.getElementById('footerYear');
+    if(anneeFooter) anneeFooter.textContent = new Date().getFullYear();
 });
 
 /* ══════════════════════════════
