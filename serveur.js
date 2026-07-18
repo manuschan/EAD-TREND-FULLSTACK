@@ -436,88 +436,108 @@ app.post("/commandes", (req, res) => {
     return res.status(400).json({ message: "Champs manquants" });
   }
 
-  // Transaction SQL réelle : verrouille la ligne le temps de vérifier
-  // la disponibilité ET de créer la commande, pour empêcher que deux
-  // acheteurs réservent le même article en même temps (race condition)
-  db.beginTransaction((errTx) => {
+  // db.js exporte un POOL (mysql.createPool) : beginTransaction/commit/rollback
+  // n'existent pas sur le pool lui-même. Il faut d'abord réserver une connexion
+  // dédiée via db.getConnection(), faire toute la transaction SUR cette connexion,
+  // puis impérativement la relâcher (connection.release()) à la fin — sur
+  // chaque chemin de sortie (succès, erreur, rollback), sinon les connexions
+  // du pool finissent par toutes rester occupées et le serveur se bloque.
+  db.getConnection((errConn, connection) => {
 
-    if (errTx) {
-      console.error(errTx);
+    if (errConn) {
+      console.error("Erreur récupération connexion pool :", errConn);
       return res.status(500).json({ message: "Erreur serveur" });
     }
 
-    db.query(
-      "SELECT utilisateur_id, statut FROM annonces WHERE id = ? FOR UPDATE",
-      [annonce_id],
-      (err, rows) => {
+    connection.beginTransaction((errTx) => {
 
-        if (err) {
-          return db.rollback(() => {
-            console.error(err);
-            res.status(500).json({ message: "Erreur serveur" });
-          });
-        }
+      if (errTx) {
+        connection.release();
+        console.error(errTx);
+        return res.status(500).json({ message: "Erreur serveur" });
+      }
 
-        if (rows.length === 0) {
-          return db.rollback(() => {
-            res.status(404).json({ message: "Annonce introuvable" });
-          });
-        }
+      connection.query(
+        "SELECT utilisateur_id, statut FROM annonces WHERE id = ? FOR UPDATE",
+        [annonce_id],
+        (err, rows) => {
 
-        if (rows[0].statut !== "disponible") {
-          return db.rollback(() => {
-            res.status(409).json({ message: "Cet article n'est plus disponible" });
-          });
-        }
+          if (err) {
+            return connection.rollback(() => {
+              connection.release();
+              console.error(err);
+              res.status(500).json({ message: "Erreur serveur" });
+            });
+          }
 
-        const vendeur_id = rows[0].utilisateur_id;
+          if (rows.length === 0) {
+            return connection.rollback(() => {
+              connection.release();
+              res.status(404).json({ message: "Annonce introuvable" });
+            });
+          }
 
-        db.query(
-          `INSERT INTO commandes (annonce_id, acheteur_id, vendeur_id, prix_final, commission)
-           VALUES (?, ?, ?, ?, ?)`,
-          [annonce_id, acheteur_id, vendeur_id, prix_final, commission || 0],
-          (err2, result) => {
+          if (rows[0].statut !== "disponible") {
+            return connection.rollback(() => {
+              connection.release();
+              res.status(409).json({ message: "Cet article n'est plus disponible" });
+            });
+          }
 
-            if (err2) {
-              return db.rollback(() => {
-                console.error(err2);
-                res.status(500).json({ message: "Erreur lors de la réservation" });
-              });
-            }
+          const vendeur_id = rows[0].utilisateur_id;
 
-            db.query(
-              "UPDATE annonces SET statut = 'reservee' WHERE id = ?",
-              [annonce_id],
-              (err3) => {
+          connection.query(
+            `INSERT INTO commandes (annonce_id, acheteur_id, vendeur_id, prix_final, commission)
+             VALUES (?, ?, ?, ?, ?)`,
+            [annonce_id, acheteur_id, vendeur_id, prix_final, commission || 0],
+            (err2, result) => {
 
-                if (err3) {
-                  return db.rollback(() => {
-                    console.error(err3);
-                    res.status(500).json({ message: "Erreur lors de la réservation" });
-                  });
-                }
+              if (err2) {
+                return connection.rollback(() => {
+                  connection.release();
+                  console.error(err2);
+                  res.status(500).json({ message: "Erreur lors de la réservation" });
+                });
+              }
 
-                db.commit((errCommit) => {
+              connection.query(
+                "UPDATE annonces SET statut = 'reservee' WHERE id = ?",
+                [annonce_id],
+                (err3) => {
 
-                  if (errCommit) {
-                    return db.rollback(() => {
-                      console.error(errCommit);
-                      res.status(500).json({ message: "Erreur serveur" });
+                  if (err3) {
+                    return connection.rollback(() => {
+                      connection.release();
+                      console.error(err3);
+                      res.status(500).json({ message: "Erreur lors de la réservation" });
                     });
                   }
 
-                  res.json({ message: "Article réservé", id: result.insertId });
+                  connection.commit((errCommit) => {
 
-                });
+                    if (errCommit) {
+                      return connection.rollback(() => {
+                        connection.release();
+                        console.error(errCommit);
+                        res.status(500).json({ message: "Erreur serveur" });
+                      });
+                    }
 
-              }
-            );
+                    connection.release();
+                    res.json({ message: "Article réservé", id: result.insertId });
 
-          }
-        );
+                  });
 
-      }
-    );
+                }
+              );
+
+            }
+          );
+
+        }
+      );
+
+    });
 
   });
 
@@ -586,6 +606,18 @@ app.post('/avis', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+
+/* =========================
+   FILET DE SÉCURITÉ GLOBAL
+   Si une route plante avec une erreur non gérée, Express renvoie par
+   défaut une page HTML d'erreur — ce qui casse "response.json()" côté
+   front. Ce middleware doit être déclaré APRÈS toutes les routes : il
+   intercepte toute erreur non attrapée et répond toujours en JSON.
+========================= */
+app.use((err, req, res, next) => {
+  console.error("Erreur non gérée :", err);
+  res.status(500).json({ message: "Erreur serveur inattendue" });
+});
 
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
