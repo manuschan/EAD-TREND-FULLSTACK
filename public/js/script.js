@@ -99,6 +99,8 @@ async function chargerAnnonces() {
 
       userId: a.utilisateur_id,
 
+      statut: a.statut || 'disponible',
+
       title: a.titre,
 
       seller: a.vendeur,
