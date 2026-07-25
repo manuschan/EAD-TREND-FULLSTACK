@@ -303,6 +303,11 @@ async function publish(){
       );
       const data = await response.json();
 
+      if(!response.ok){
+        toast('⚠️ ' + (data.message || "Upload refusé"));
+        return;
+      }
+
       if(data.images && data.images.length){
         imageUrl = data.images[0];
       }

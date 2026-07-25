@@ -1,7 +1,9 @@
+require("dotenv").config();
 const db = require("./db");
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
+const { createClient } = require("@supabase/supabase-js");
 // const fs = require("fs");
 // const path = require("path");
 
@@ -12,35 +14,102 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
-app.use("/uploads", express.static("uploads"));
+// Le dossier "uploads/" local n'est plus utilisé : les images passent
+// maintenant par Supabase Storage (stockage persistant, contrairement
+// au disque éphémère de Render).
 
 /* =========================
-   CONFIG UPLOAD  
-========================= */    
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
+   CONFIG UPLOAD — Supabase Storage
+   (stockage persistant, remplace Cloudinary suite au blocage de compte)
+========================= */
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+const NOM_BUCKET = "ead-trend-images";
+
+// memoryStorage : le fichier reste en mémoire (req.file.buffer), on ne
+// l'écrit JAMAIS sur le disque de Render — on l'envoie directement à Supabase
+const storage = multer.memoryStorage();
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5 Mo max par image
+    files: 10                  // cohérent avec upload.array("images", 10) plus bas
   },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
+  fileFilter: (req, file, cb) => {
+    const typesAutorises = /^image\/(jpeg|jpg|png|webp|gif|heic|heif)$/i;
+    if (typesAutorises.test(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Type de fichier non autorisé (images uniquement)"));
+    }
   }
 });
-
-const upload = multer({ storage });
 
 
 
 /* =========================
    ROUTE UPLOAD
 ========================= */
-app.post("/upload", upload.array("images", 10), (req, res) => {
-  const files = req.files;
+app.post("/upload", upload.array("images", 10), async (req, res) => {
 
-  const urls = files.map(file =>
-  `/uploads/${file.filename}`
-);
+  try {
 
-  res.json({ images: urls });
+    const files = req.files;
+    const urls = [];
+
+    for (const file of files) {
+
+      // Nom unique pour éviter les collisions entre deux uploads du même nom
+      const nomFichier = `${Date.now()}-${file.originalname}`;
+
+      const { error } = await supabase.storage
+        .from(NOM_BUCKET)
+        .upload(nomFichier, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false
+        });
+
+      if (error) {
+        console.error("Erreur upload Supabase :", error);
+        return res.status(500).json({
+          message: "Erreur lors de l'upload de l'image"
+        });
+      }
+
+      const { data } = supabase.storage
+        .from(NOM_BUCKET)
+        .getPublicUrl(nomFichier);
+
+      urls.push(data.publicUrl);
+
+    }
+
+    res.json({ images: urls });
+
+  } catch (err) {
+    console.error("Erreur inattendue /upload :", err);
+    res.status(500).json({ message: "Erreur serveur lors de l'upload" });
+  }
+
+});
+
+// Erreurs multer (taille dépassée, type refusé...) arrivent ici plutôt
+// que de faire planter le serveur ou renvoyer une page HTML au front
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(413).json({ message: "Image trop lourde (5 Mo maximum)" });
+    }
+    return res.status(400).json({ message: "Erreur lors de l'upload : " + err.message });
+  }
+  if (err && err.message && err.message.includes("non autorisé")) {
+    return res.status(400).json({ message: err.message });
+  }
+  next(err);
 });
 
 app.get("/test", (req, res) => {
