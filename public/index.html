@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><em>EAD-TREND</em></title>
+  <title>EAD-TREND</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -167,8 +167,8 @@
     <a href="https://wa.me/242065537650" class="whatsapp-btn" target="blank" aria-label="contact whatsapp"> <i class="fab fa-whatsapp"></i></a>
   </div>
   
-  <div class="pop-up" id="connexion">
-    <form action="" method="get"  >
+<div class="pop-up" id="connexion">
+    <form onsubmit="return false;">
       <span class="close-btn" onclick="closePop('connexion')">&times;</span>
       <h2>Connectez-vous</h2>
       <input type="email" id="loginEmail" placeholder="E-mail">
@@ -177,7 +177,7 @@
     </form>
   </div>
   <div class="pop-up" id="inscription">
-    <form action="" method="get" id="registerForm" >
+    <form id="registerForm" onsubmit="return false;">
       <span class="close-btn" onclick="closePop('inscription')">&times;</span>
       <h2>inscrivez-vous</h2>
       <input type="text" name="nom" id="nom" placeholder="Nom(s)" required>
@@ -185,11 +185,11 @@
       <input type="email" name="email" id="email" placeholder="E-mail" required>
       <input type="tel" name="telephone" id="telephone" placeholder="Numéro de téléphone" pattern="[0-9+ ]{6,20}" required>
       <input type="password" name="password" id="password" placeholder="Mot de passe" required>
-      <button type="submit">Envoyer</button>
+      <button type="button" onclick="inscription()">Envoyer</button>
     </form>
   </div>
-  
 
+  
     <!-- ══════ POP-UP IMAGE COMPLÈTE ══════ -->
   <div class="pop-up" id="imageComplete">
     <div class="image-panel">
@@ -595,9 +595,9 @@
 </div>
 
 <!-- ══════════ AVIS DES UTILISATEURS ══════════ -->
-<div id="avisSection">
+<div class="section-avis" id="avisSection">
   <div class="market-head">
-    <div>
+    <div class="banner">
       <div class="section-label" style="margin-bottom:.6rem"><span class="pulse"></span> Retours de la communauté</div>
       <h2>Ce que <em>disent</em> les étudiant·es</h2>
     </div>

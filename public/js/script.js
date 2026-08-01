@@ -362,20 +362,25 @@ async function publish(){
 
   try {
 
-  const utilisateur =
-  JSON.parse(localStorage.getItem("utilisateur"));
+  const utilisateur = getUtilisateur();
 
+  if(!utilisateur){
+    toast("⚠️ Connecte-toi pour publier une annonce");
+    return;
+  }
 
   const response = await fetch(
     "/annonces",
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + getToken()
       },
       body: JSON.stringify({
         id: art.id,
-        utilisateur_id: utilisateur.id, 
+        // utilisateur_id n'est plus lu par le serveur : l'id réel vient
+        // maintenant du jeton de session vérifié en base (voir verifierSession)
         titre: art.title,
         vendeur: art.seller,
         description: art.desc,
@@ -454,73 +459,62 @@ function renderGrid(){
 
 
 // registre d'inscription
-const registerForm =
-document.getElementById("registerForm");
-
-registerForm.addEventListener(
-"submit",
-async function(e){
-
-    e.preventDefault();
+async function inscription() {
 
     const data = {
-        nom:
-        document.getElementById("nom").value,
-
-        prenom:
-        document.getElementById("prenom").value,
-
-        email:
-        document.getElementById("email").value,
-
-        telephone:
-        document.getElementById("telephone").value,
-
-        password:
-        document.getElementById("password").value
+        nom: document.getElementById("nom").value,
+        prenom: document.getElementById("prenom").value,
+        email: document.getElementById("email").value,
+        telephone: document.getElementById("telephone").value,
+        password: document.getElementById("password").value
     };
 
-    try{
+    try {
 
-        const response =
-        await fetch(
-        "/inscription",
-        {
-            method:"POST",
+        const response = await fetch(
+            "/inscription",
+            {
+                method: "POST",
 
-            headers:{
-                "Content-Type":"application/json"
-            },
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-            body:JSON.stringify(data)
-        });
-
-        const result =
-        await response.json();
-
-        alert(result.message);
-
-        if(result.utilisateur){
-            localStorage.setItem(
-                "utilisateur",
-                JSON.stringify(result.utilisateur)
-            );
-            closePop("inscription");
-            majUIConnecte();
-        }
-
-    }
-    catch(error){
-
-        console.error(error);
-
-        alert(
-        "Erreur serveur"
+                body: JSON.stringify(data)
+            }
         );
 
+        const result = await response.json();
+
+        if (!response.ok) {
+
+            alert(result.message);
+            return;
+
+        }
+
+        localStorage.setItem(
+            "utilisateur",
+            JSON.stringify(result.utilisateur)
+        );
+
+        localStorage.setItem("token", result.token || "");
+
+        toast("Inscription réussie");
+
+        closePop("inscription");
+        majUIConnecte();
+
+    }
+    catch(err) {
+
+        console.error(err);
+
+        toast("❌ Erreur d'inscription");
+
     }
 
-});
+}
 
 
 async function connexion() {
@@ -562,6 +556,8 @@ async function connexion() {
             "utilisateur",
             JSON.stringify(result.utilisateur)
         );
+
+        localStorage.setItem("token", result.token || "");
 
         toast("Connexion réussie");
 
@@ -774,10 +770,14 @@ async function confirmerReservation(){
 
     const response = await fetch('/commandes', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + getToken()
+      },
       body: JSON.stringify({
         annonce_id: a.id,
-        acheteur_id: u.id,
+        // acheteur_id n'est plus lu par le serveur : l'id réel vient
+        // maintenant du jeton de session vérifié en base (voir verifierSession)
         prix_final: a.price
       })
     });
@@ -871,6 +871,12 @@ function getUtilisateur(){
   }catch(e){
     return null;
   }
+}
+
+// Jeton de session (protection intermédiaire) : à envoyer dans l'en-tête
+// Authorization sur toute requête vers une route protégée par verifierSession
+function getToken(){
+  return localStorage.getItem("token") || null;
 }
 
 function initiales(nom, prenom){
@@ -1023,6 +1029,7 @@ function makeCompteItem(a){
 
 function deconnexion(){
   localStorage.removeItem("utilisateur");
+  localStorage.removeItem("token");
   favs = new Set();
   closePop("moncompte");
   toast("👋 Déconnecté(e)");

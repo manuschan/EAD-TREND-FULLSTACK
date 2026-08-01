@@ -29,15 +29,13 @@ const supabase = createClient(
 
 const NOM_BUCKET = "ead-trend-images";
 
-// memoryStorage : le fichier reste en mémoire (req.file.buffer), on ne
-// l'écrit JAMAIS sur le disque de Render — on l'envoie directement à Supabase
 const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5 Mo max par image
-    files: 10                  // cohérent avec upload.array("images", 10) plus bas
+    files: 10                  
   },
   fileFilter: (req, file, cb) => {
     const typesAutorises = /^image\/(jpeg|jpg|png|webp|gif|heic|heif)$/i;
@@ -97,8 +95,7 @@ app.post("/upload", upload.array("images", 10), async (req, res) => {
 
 });
 
-// Erreurs multer (taille dépassée, type refusé...) arrivent ici plutôt
-// que de faire planter le serveur ou renvoyer une page HTML au front
+// Erreurs multer (taille dépassée, type refusé...) 
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {
